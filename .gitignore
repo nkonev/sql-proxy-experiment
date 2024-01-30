@@ -1,0 +1,14 @@
+# IDE
+.idea
+**/.DS_Store
+.vscode/
+
+# bin
+/pst
+/*.json
+*.exe
+candidate-repository
+report.xml
+
+# config
+local.env
