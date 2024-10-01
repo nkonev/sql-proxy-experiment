@@ -61,45 +61,53 @@ func main() {
 	defer db.Close()
 
 	_, err = db.Exec(
-		"CREATE TABLE IF NOT EXISTS t1 (id INTEGER PRIMARY KEY)",
+		"CREATE TABLE IF NOT EXISTS t1 (id INTEGER PRIMARY KEY, name TEXT)",
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	_, err = db.Exec(
-		"INSERT INTO t1 (id) VALUES ($1)",
+		"INSERT INTO t1 (id, name) VALUES ($1, $2)",
 		42,
+		"the first",
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 	_, err = db.Exec(
-		"INSERT INTO t1 (id) VALUES ($1)",
+		"INSERT INTO t1 (id, name) VALUES ($1, $2)",
 		44,
+		"the second",
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	rows, err := db.Query("SELECT id FROM t1 WHERE id = ?1", 44)
+	rows, err := db.Query("SELECT id, name FROM t1 WHERE id = ?1 and name = ?2", 44, "the second")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 
-	results := make([]int, 0)
+	results := make([]struct {
+		Id   int
+		Name string
+	}, 0)
 	for rows.Next() {
-		var i int
-		err = rows.Scan(&i)
+		var str struct {
+			Id   int
+			Name string
+		}
+		err = rows.Scan(&str.Id, &str.Name)
 		if err != nil {
 			log.Fatal(err)
 		}
-		results = append(results, i)
+		results = append(results, str)
 	}
 
-	log.Printf("Result:")
+	log.Printf("Results:")
 	for _, ir := range results {
-		log.Printf("row(%d)\n", ir)
+		log.Printf("row(%#v, %#v)\n", ir.Id, ir.Name)
 	}
 }
